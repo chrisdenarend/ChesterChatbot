@@ -10,7 +10,7 @@ namespace ChesterChatbot.Dialogs
     {
         public async Task StartAsync(IDialogContext context)
         {
-            await context.PostAsync("First things first, can you please tell me your name?");
+            await context.PostAsync("First things first, can you please tell me your name.?");
 
             context.Wait(this.MessageReceivedAsync);
         }
