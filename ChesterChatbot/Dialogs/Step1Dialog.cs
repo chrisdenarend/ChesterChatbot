@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Connector;
 
 namespace ChesterChatbot.Dialogs
 {
@@ -13,7 +12,7 @@ namespace ChesterChatbot.Dialogs
      * Validate Question
      */
     [Serializable]
-    public class Step1Dialog : IDialog<object>
+    public class Step1Dialog : IDialog<string>
     {
         /*
          * Conversation constants
@@ -47,92 +46,208 @@ namespace ChesterChatbot.Dialogs
          */
         private Boolean QuestionAnsweredCorrectly = false;
         private int LastmessageShown = -1;
+        private IDialogContext CurrentContext;
 
-        public Task StartAsync(IDialogContext context)
+        /* Working Code */
+        public async Task StartAsync (IDialogContext context)
         {
-            GetCurrentUserData(context);
+            PromptDialog.Confirm(context, ShowFirstContent, $"Are you ready to start your introduction?", promptStyle: PromptStyle.Keyboard);
+        }
+        public async Task ShowFirstContent(IDialogContext context, IAwaitable<bool> result)
+        {
+            IEnumerable<string> options = new List<string>() { "Next" };
+            await context.PostAsync(Message_Introduction);
+            await context.PostAsync(Message_IntroToMedia1);
+            await context.PostAsync("Here The Video Will Be Placed");
+            PromptDialog.Confirm(context, ShowSecondContent, $"Are you ready for the next content", promptStyle: PromptStyle.Keyboard);
+        }
+        public async Task ShowSecondContent(IDialogContext context, IAwaitable<bool> result)
+        {
+            IEnumerable<string> options = new List<string>() { "Next" };
+            await context.PostAsync(Message_IntroToMedia2);
+            await context.PostAsync("Here The Video Will Be Placed");
+            PromptDialog.Confirm(context, ShowThirdContent, $"Are you ready for the next content", promptStyle: PromptStyle.Keyboard);
+        }
 
-            if (QuestionAnsweredCorrectly)
+        public async Task ShowThirdContent(IDialogContext context, IAwaitable<bool> result)
+        {
+            IEnumerable<string> options = new List<string>() { "Next" };
+            await context.PostAsync(Message_IntroToMedia3);
+            await context.PostAsync("Here The Video Will Be Placed");
+            PromptDialog.Confirm(context, ShowFourthContent, $"Are you ready for the next content", promptStyle: PromptStyle.Keyboard);
+        }
+
+        public async Task ShowFourthContent(IDialogContext context, IAwaitable<bool> result)
+        {
+            IEnumerable<string> options = new List<string>() { "Next" };
+            await context.PostAsync(Message_IntroToMedia4);
+            await context.PostAsync("Here The Video Will Be Placed");
+            PromptDialog.Confirm(context, ShowFinalQuestion, $"Are you ready for the next content", promptStyle: PromptStyle.Keyboard);
+        }
+
+        public async Task ShowFinalQuestion(IDialogContext context, IAwaitable<bool> result)
+        {
+            IEnumerable<string> options = new List<string>() { "Next" };
+            await context.PostAsync(Message_IntroToQuestion);
+            PromptDialog.Text(context, FinalQuestionAnswered, Message_Question);
+       }
+        public async Task FinalQuestionAnswered(IDialogContext context, IAwaitable<string> result)
+        {
+            string answer = await result;
+            if (answer.Contains(Question_Answer))
             {
-                context.PostAsync(Message_End);
+                await context.PostAsync(Question_Correct);
+                context.Done(Question_Correct);
             }
             else
             {
-                ShowStepMessage(context);
+                await context.PostAsync(Question_Wrong);
+                context.Done(Question_Wrong);
             }
-            return Task.CompletedTask;
         }
+        
+        /* Old practice code */
+        //public async Task StartAsync(IDialogContext context)
+        //{
+        //    //CurrentContext = context;
+        //    //GetCurrentUserData();
+        //    //if (QuestionAnsweredCorrectly)
+        //    //{
+        //    //    CurrentContext.PostAsync(Message_End);
+        //    //}
+        //    //else
+        //    //{
+        //    //    DetermineStepMessage();
+        //    //}
 
-        private Task ShowStepMessage(IDialogContext context)
-        {
-            IEnumerable<string> options = new List<string>() { "Next" };
+        //    //PromptDialog.Confirm(context, MessageReceivedAsync, $"Are you ready to progress?", promptStyle: PromptStyle.Keyboard);
+        //    PromptDialog.Confirm(context, StartMessageReceivedAsync, $"Are you ready to progress?", promptStyle: PromptStyle.Keyboard);
+        //}
+
+
+
+        //public async Task FirstContentShown(IDialogContext context, IAwaitable<bool> result)
+        //{
+        //    IEnumerable<string> options = new List<string>() { "Next" };
+        //    await context.PostAsync(Message_IntroToMedia2);
+        //    await context.PostAsync("Here The Video Will Be Placed");
+        //    PromptDialog.Confirm(context, StartMessageReceivedAsync, $"Are you ready for the next step", promptStyle: PromptStyle.Keyboard);
+        //}
+        //private Task MessageReceivedAsync(IDialogContext context, IAwaitable<bool> result)
+        //{
+        //    //var message = await result;
+        //    CurrentContext = context;
+        //    GetCurrentUserData();
+
+        //    if (QuestionAnsweredCorrectly)
+        //    {
+        //        CurrentContext.PostAsync(Message_End);
+        //    }
+        //    else
+        //    {
+        //        DetermineStepMessage();
+        //    }
+        //    return Task.CompletedTask;
+        //    //await MessageReceivedAsync;
+        //}
+        //private  void DetermineStepMessage()
+        //{
+        //    ShowStepMessage(new List<string>() { Message_Introduction, Message_IntroToMedia1 },
+        //                URL_Media1);
+        //    //return Task.CompletedTask;
+        //    /*
+        //    switch (LastmessageShown)
+        //    {
+        //        case -1:
+        //            await ShowStepMessage(new List<string>() { Message_Introduction, Message_IntroToMedia1 },
+        //                URL_Media1);
+        //            break;
+        //        case 0:
+        //            ShowStepMessage(new List<string>() { Message_IntroToMedia2 },
+        //                URL_Media2);
+        //            break;
+        //        case 1:
+        //            ShowStepMessage(new List<string>() { Message_IntroToMedia3 },
+        //                URL_Media3);
+        //            break;
+        //        case 2:
+        //            ShowStepMessage(new List<string>() { Message_IntroToMedia4 },
+        //                URL_Media4);
+        //            break;
+        //        case 3:
+        //            ShowStepQuestion(new List<string>() { Message_IntroToQuestion, Message_Question });
+        //            break;
+        //    }
+        //    //return Task.CompletedTask;
             
-            switch (LastmessageShown)
-            {
-                case -1:
-                    context.PostAsync(Message_Introduction);
-                    context.PostAsync(Message_IntroToMedia1);
-                    context.PostAsync("This is where the video will be shown");
-                    PromptDialog.Choice(context, OnOptionSelected, options, $"Press next when you are done watching the video", promptStyle: PromptStyle.Keyboard);
-                    break;
-                case 0:
-                    context.PostAsync(Message_IntroToMedia2);
-                    context.PostAsync("This is where the video will be shown");
-                    PromptDialog.Choice(context, OnOptionSelected, options, $"Press next when you are done watching the video", promptStyle: PromptStyle.Keyboard);
-                    break;
-                case 1:
-                    context.PostAsync(Message_IntroToMedia3);
-                    context.PostAsync("This is where the video will be shown");
-                    PromptDialog.Choice(context, OnOptionSelected, options, $"Press next when you are done watching the video", promptStyle: PromptStyle.Keyboard);
-                    break;
-                case 2:
-                    context.PostAsync(Message_IntroToMedia4);
-                    context.PostAsync("This is where the video will be shown");
-                    PromptDialog.Choice(context, OnOptionSelected, options, $"Press next when you are done watching the video", promptStyle: PromptStyle.Keyboard);
-                    break;
-                case 3:
-                    context.PostAsync(Message_IntroToQuestion);
-                    context.PostAsync(Message_Question);
-                    PromptDialog.Choice(context, OnOptionSelected_Temp, options, $"Press next when you gave the right answer", promptStyle: PromptStyle.Keyboard);
-                    break;
-            }
-            return Task.CompletedTask;
-        }
-        private Task OnOptionSelected(IDialogContext context, IAwaitable<string> result)
-        {
-            SaveCurrentUserData(context);
-            ShowStepMessage(context);
-            return Task.CompletedTask;
-        }
-        private async Task OnOptionSelected_Temp(IDialogContext context, IAwaitable<string> result)
-        {
-            SaveCurrentUserData(context, true);
-            context.Done(await result);
-        }
-        private void GetCurrentUserData(IDialogContext context)
-        {
-            /* To Be Replaced When implementing State Management*/
-            int? _lastmessageShown;
-            Boolean? _questionAnsweredCorrectly;
+        //}
+        //private void ShowStepMessage(List<string> message_Text, string url_Media)
+        //{
+        //    IEnumerable<string> options = new List<string>() { "Next" };
+        //    /* Show Messages */
+        //    foreach (string message in message_Text)
+        //    {
+        //       CurrentContext.PostAsync(message);
+        //    }
 
-            context.UserData.TryGetValue(UserData_LastMessageShown, out _lastmessageShown);
-            context.UserData.TryGetValue(UserData_QuestionAnsweredCorrectly, out _questionAnsweredCorrectly);
+        //    /* Show Media */
+        //    CurrentContext.PostAsync("This is where the video will be shown");
+        //    //CurrentContext.Wait(MessageReceivedAsync);
+        //    //await MessageReceivedAsync(CurrentContext);
+        //    //await MessageReceivedAsync(CurrentContext);
+        //    PromptDialog.Confirm(CurrentContext, MessageReceivedAsync, $"Are you ready for the next step", promptStyle: PromptStyle.Keyboard);
+        //    //PromptDialog.Choice(CurrentContext, OnClickedNext, options, $"Press next when you watched the video", promptStyle: PromptStyle.Keyboard);
+            
+        //    //return Task.CompletedTask;
+        //    //await this.MessageReceivedAsync();
+        //    //CurrentContext.Wait(MessageReceivedAsync);
+        //}
+        //private Task ShowStepQuestion(List<string> message_Text)
+        //{
+        //    /* Show Question */
+        //    foreach (string message in message_Text)
+        //    {
+        //        CurrentContext.PostAsync(message);
+        //    }
+            
+        //    return Task.CompletedTask;
+        //}
+        //private async Task OnClickedNext(IDialogContext context, IAwaitable<string> result)
+        //{
+        //    //SaveCurrentUserData();
+        //    //await Task.Run(DetermineStepMessage);
+        //    //return Task.CompletedTask
+        //    context.Done(await result);
+        //}
+        //private Task OnOptionSelected_Temp()
+        //{
+        //    SaveCurrentUserData(true);
+        //    return Task.CompletedTask;
+        //}
+        //private void GetCurrentUserData()
+        //{
+        //    /* To Be Replaced When implementing State Management*/
+        //    int? _lastmessageShown;
+        //    Boolean? _questionAnsweredCorrectly;
 
-            QuestionAnsweredCorrectly = _questionAnsweredCorrectly.HasValue ? _questionAnsweredCorrectly.Value : false;
-            LastmessageShown = _lastmessageShown.HasValue ? _lastmessageShown.Value : -1;
-        }
+        //    CurrentContext.UserData.TryGetValue(UserData_LastMessageShown, out _lastmessageShown);
+        //    CurrentContext.UserData.TryGetValue(UserData_QuestionAnsweredCorrectly, out _questionAnsweredCorrectly);
 
-        private void SaveCurrentUserData(IDialogContext context, Boolean questionAnsweredCorrectly =false)
-        {
-            /* To Be Replaced When implementing State Management*/
-            int _lastmessageShown = LastmessageShown >= 3 ? 0 : LastmessageShown + 1;
-            Boolean _questionAnsweredCorrectly = false;
+        //    QuestionAnsweredCorrectly = _questionAnsweredCorrectly.HasValue ? _questionAnsweredCorrectly.Value : false;
+        //    LastmessageShown = _lastmessageShown.HasValue ? _lastmessageShown.Value : -1;
+        //}
 
-            context.UserData.SetValue<int>(UserData_LastMessageShown, _lastmessageShown);
-            context.UserData.SetValue<Boolean>(UserData_QuestionAnsweredCorrectly, _questionAnsweredCorrectly);
+        //private void SaveCurrentUserData(Boolean questionAnsweredCorrectly =false)
+        //{
+        //    /* To Be Replaced When implementing State Management*/
+        //    int _lastmessageShown = LastmessageShown >= 3 ? -1 : LastmessageShown + 1;
+        //    Boolean _questionAnsweredCorrectly = false;
 
-            QuestionAnsweredCorrectly = _questionAnsweredCorrectly;
-            LastmessageShown = _lastmessageShown;
-        }
+        //    CurrentContext.UserData.SetValue<int>(UserData_LastMessageShown, _lastmessageShown);
+        //    CurrentContext.UserData.SetValue<Boolean>(UserData_QuestionAnsweredCorrectly, _questionAnsweredCorrectly);
+
+        //    QuestionAnsweredCorrectly = _questionAnsweredCorrectly;
+        //    LastmessageShown = _lastmessageShown;
+        //}
     }
 }

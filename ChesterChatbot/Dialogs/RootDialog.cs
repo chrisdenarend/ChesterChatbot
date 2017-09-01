@@ -63,6 +63,7 @@ namespace ChesterChatbot.Dialogs
 
         private async Task StepDialogResumeAfter(IDialogContext context, IAwaitable<object> result)
         {
+            await context.PostAsync($"Step is Done");
             context.Call(new IntroDialog(), IntroDialogResumeAfter);
         }
     }

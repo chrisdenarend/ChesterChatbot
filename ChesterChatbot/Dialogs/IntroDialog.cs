@@ -11,7 +11,7 @@ namespace ChesterChatbot.Dialogs
         public async Task StartAsync(IDialogContext context)
         {
             IEnumerable<string> options = new List<string>() { "My first time", "Already made some progress" };
-            PromptDialog.Choice(context, OnOptionSelected, options, $"Hi {context.UserData.GetValue<string>("name")}, did you already made some progress or is this your first time? ", promptStyle: PromptStyle.Keyboard);
+            PromptDialog.Choice(context, OnOptionSelected, options, $"Hi {context.UserData.GetValue<string>("name")}, did you already make some progress or is this your first time? ", promptStyle: PromptStyle.Keyboard);
         }
 
         private async Task OnOptionSelected(IDialogContext context, IAwaitable<string> result)
