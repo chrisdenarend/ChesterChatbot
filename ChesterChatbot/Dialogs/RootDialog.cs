@@ -44,6 +44,8 @@ namespace ChesterChatbot.Dialogs
                 {
                     case "My first time":
                         context.Call(new Step1Dialog(), StepDialogResumeAfter);
+                        /* Following code is not working yet */
+                        //context.Call(new Step1DialogRefactored(), StepDialogResumeAfter);
                         break;
                     case "Already made some progress":
                         context.Call(new IntroDialog(), IntroDialogResumeAfter);
