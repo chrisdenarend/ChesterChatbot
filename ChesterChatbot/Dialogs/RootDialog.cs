@@ -43,7 +43,9 @@ namespace ChesterChatbot.Dialogs
                 switch (result.GetAwaiter().GetResult())
                 {
                     case "My first time":
-                        context.Call(new IntroDialog(), IntroDialogResumeAfter);
+                        context.Call(new Step1Dialog(), StepDialogResumeAfter);
+                        /* Following code is not working yet */
+                        //context.Call(new Step1DialogRefactored(), StepDialogResumeAfter);
                         break;
                     case "Already made some progress":
                         context.Call(new IntroDialog(), IntroDialogResumeAfter);
@@ -59,6 +61,12 @@ namespace ChesterChatbot.Dialogs
                 await context.PostAsync("I don't understand, let's try again.");
                 await StartAsync(context);
             }
+        }
+
+        private async Task StepDialogResumeAfter(IDialogContext context, IAwaitable<object> result)
+        {
+            await context.PostAsync($"Step is Done");
+            context.Call(new IntroDialog(), IntroDialogResumeAfter);
         }
     }
 }
